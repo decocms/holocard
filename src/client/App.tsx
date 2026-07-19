@@ -535,7 +535,7 @@ export default function App() {
               <textarea
                 value={prompt}
                 maxLength={800}
-                rows={6}
+                rows={10}
                 placeholder="Ex.: A Tally faz aniversário. Somos amigas desde a escola. Quero desejar um ano leve."
                 onChange={(event) => setPrompt(event.target.value)}
               />

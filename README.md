@@ -108,7 +108,21 @@ wrangler secret put MCP_AUTH_TOKEN
 wrangler secret put RATE_LIMIT_SALT
 ```
 
-Then deploy and migrate:
+### Automatic deploys (Workers Builds)
+
+Connect the GitHub repo once in the Cloudflare dashboard so every push to `main` builds and deploys:
+
+1. In the Cloudflare dashboard, open the `holocard` Worker → **Settings** → **Builds**.
+2. Under **Git Repository**, select **Connect** and authorize `decocms/holocard`.
+3. Use these build settings:
+   - Production branch: `main`
+   - Build command: `bun run build`
+   - Deploy command: `bunx wrangler deploy`
+   - Root directory: `/`
+
+After that, pushes to `main` deploy automatically. Non-`main` branches can use the default preview command (`bunx wrangler versions upload`).
+
+### Manual deploy
 
 ```bash
 bun run deploy
