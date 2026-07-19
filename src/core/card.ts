@@ -48,6 +48,9 @@ export const CARD_STYLES = String.raw`
 .holo-copy [contenteditable="true"]:empty::before{color:oklch(.5 .025 345);content:attr(data-placeholder)}
 .holo-chip{position:absolute;z-index:12;right:clamp(18px,5vw,28px);top:clamp(18px,5vw,28px);min-height:36px;display:inline-flex;align-items:center;padding:7px 11px;border:1px solid oklch(1 0 0/.65);border-radius:999px;background:oklch(.15 .02 345/.72);box-shadow:0 6px 18px oklch(.05 0 0/.18);color:white;font-size:.78rem;font-weight:700;text-decoration:none;backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent}
 .holo-chip:focus-visible{outline:3px solid var(--holo-aqua);outline-offset:3px}
+.holo-motion-button{position:absolute;z-index:13;left:50%;bottom:clamp(18px,5vw,28px);min-height:40px;padding:10px 16px;border:1px solid oklch(1 0 0/.7);border-radius:999px;background:oklch(.15 .02 345/.82);box-shadow:0 10px 28px oklch(.05 0 0/.28);color:white;font:inherit;font-size:.84rem;font-weight:750;cursor:pointer;transform:translateX(-50%);backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent}
+.holo-motion-button:focus-visible{outline:3px solid var(--holo-aqua);outline-offset:3px}
+.holo-motion-button[hidden]{display:none}
 .holo-foil,.holo-lines,.holo-glare,.holo-photo-foil,.holo-sparkle{position:absolute;inset:0;z-index:5;pointer-events:none}
 .holo-foil{background-image:var(--holo);background-size:260% 260%;background-position:var(--posx) var(--posy);mix-blend-mode:overlay;opacity:calc(.22 + var(--active)*.52);mask-image:radial-gradient(circle at var(--mx) var(--my),#000 0%,#0005 32%,transparent 62%)}
 .holo-lines{background-image:repeating-linear-gradient(100deg,transparent 0 3px,white 3px 4px);background-size:200% 100%;background-position:var(--posx) 0;mix-blend-mode:overlay;opacity:calc(var(--active)*.24)}
@@ -85,8 +88,9 @@ const INTERACTION_SCRIPT = String.raw`
     rx: 0, ry: 0, tx: 0, ty: 0, active: false, raf: 0,
     dragging: false, moved: false, startX: 0, startY: 0,
     baseBeta: null, baseGamma: null, orientationReceiving: false,
-    orientationEnabled: false, permissionAttempted: false
+    orientationEnabled: false, orientationGranted: false, permissionBusy: false
   };
+  let motionButton = null;
   const revealGesture = {
     dragging: false, opened: false, pointerId: null,
     startX: 0, startY: 0, dx: 0, dy: 0
@@ -241,19 +245,55 @@ const INTERACTION_SCRIPT = String.raw`
   const enableOrientation = () => {
     if (state.orientationEnabled || reduceMotion) return;
     state.orientationEnabled = true;
+    state.orientationGranted = true;
     addEventListener("deviceorientation", onOrientation);
+    motionButton?.setAttribute("hidden", "");
   };
 
-  const requestOrientation = () => {
-    if (reduceMotion || state.permissionAttempted || !window.DeviceOrientationEvent) return;
-    state.permissionAttempted = true;
-    const Orientation = window.DeviceOrientationEvent;
-    if (typeof Orientation.requestPermission === "function") {
-      Orientation.requestPermission().then((permission) => {
-        if (permission === "granted") enableOrientation();
-      }).catch(() => {});
-    } else {
+  const needsOrientationPermission = () =>
+    typeof window.DeviceOrientationEvent?.requestPermission === "function";
+
+  const showMotionButton = () => {
+    if (reduceMotion || !needsOrientationPermission() || state.orientationGranted || motionButton) return;
+    motionButton = document.createElement("button");
+    motionButton.type = "button";
+    motionButton.className = "holo-motion-button";
+    motionButton.textContent = "Ativar movimento";
+    motionButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      void requestOrientation();
+    });
+    stage.appendChild(motionButton);
+  };
+
+  const requestOrientation = async () => {
+    if (reduceMotion || state.orientationGranted || state.permissionBusy || !window.DeviceOrientationEvent) {
+      return state.orientationGranted;
+    }
+    state.permissionBusy = true;
+    try {
+      const Orientation = window.DeviceOrientationEvent;
+      const Motion = window.DeviceMotionEvent;
+      if (typeof Orientation.requestPermission === "function") {
+        const orientationPermission = await Orientation.requestPermission();
+        if (typeof Motion?.requestPermission === "function") {
+          try { await Motion.requestPermission(); } catch {}
+        }
+        if (orientationPermission === "granted") {
+          enableOrientation();
+          return true;
+        }
+        showMotionButton();
+        return false;
+      }
       enableOrientation();
+      return true;
+    } catch {
+      showMotionButton();
+      return false;
+    } finally {
+      state.permissionBusy = false;
     }
   };
 
@@ -263,14 +303,16 @@ const INTERACTION_SCRIPT = String.raw`
       state.moved = false;
       return;
     }
-    requestOrientation();
+    void requestOrientation();
   });
 
   const openPublishedCard = () => {
     if (revealGesture.opened) return;
     revealGesture.opened = true;
     revealGesture.dragging = false;
-    requestOrientation();
+    void requestOrientation().then((granted) => {
+      if (!granted) showMotionButton();
+    });
     publishedCard?.removeAttribute("inert");
     publishedCard?.removeAttribute("aria-hidden");
     publishedCard?.setAttribute("data-revealed", "true");
@@ -299,7 +341,10 @@ const INTERACTION_SCRIPT = String.raw`
   revealButton?.addEventListener("pointerup", (event) => finishRevealSwipe(event));
   revealButton?.addEventListener("pointercancel", (event) => finishRevealSwipe(event, true));
   revealButton?.addEventListener("click", () => {
-    if (finePointer) openPublishedCard();
+    if (revealGesture.opened) return;
+    // A real tap should open even on phones; swipe already opens via pointerup.
+    if (Math.hypot(revealGesture.dx, revealGesture.dy) > 12) return;
+    openPublishedCard();
   });
   revealButton?.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -493,7 +538,7 @@ export function renderCardDocument(
         <span class="holo-reveal-copy">
           <strong>Tem um cartão para você.</strong>
           <small>
-            <span class="holo-reveal-instruction--touch">Deslize para abrir</span>
+            <span class="holo-reveal-instruction--touch">Toque ou deslize para abrir</span>
             <span class="holo-reveal-instruction--desktop">Clique para abrir</span>
           </small>
         </span>

@@ -54,7 +54,8 @@ export function HoloCard({
     baseGamma: null as number | null,
     orientationEnabled: false,
     orientationReceiving: false,
-    permissionAttempted: false,
+    orientationGranted: false,
+    permissionBusy: false,
   });
 
   // Orientation listeners intentionally mount once and keep mutable motion in refs.
@@ -223,28 +224,41 @@ export function HoloCard({
       return;
     }
     state.orientationEnabled = true;
+    state.orientationGranted = true;
     window.addEventListener("deviceorientation", onOrientation);
   }
 
   async function requestOrientation() {
     const state = stateRef.current;
     if (
-      state.permissionAttempted ||
+      state.orientationGranted ||
+      state.permissionBusy ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
       return;
     }
     const Orientation = window.DeviceOrientationEvent as OrientationConstructor | undefined;
+    const Motion = window.DeviceMotionEvent as OrientationConstructor | undefined;
     if (!Orientation) return;
-    state.permissionAttempted = true;
-    if (typeof Orientation.requestPermission === "function") {
-      try {
-        if ((await Orientation.requestPermission()) === "granted") enableOrientation();
-      } catch {
-        // Touch drag remains available when permission is declined.
+    state.permissionBusy = true;
+    try {
+      if (typeof Orientation.requestPermission === "function") {
+        const permission = await Orientation.requestPermission();
+        if (typeof Motion?.requestPermission === "function") {
+          try {
+            await Motion.requestPermission();
+          } catch {
+            // Orientation permission is enough for tilt.
+          }
+        }
+        if (permission === "granted") enableOrientation();
+      } else {
+        enableOrientation();
       }
-    } else {
-      enableOrientation();
+    } catch {
+      // Touch drag remains available when permission is declined.
+    } finally {
+      state.permissionBusy = false;
     }
   }
 
