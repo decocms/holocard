@@ -348,7 +348,7 @@ select:focus-visible {
 
 .creator-intake {
   display: grid;
-  grid-template-columns: minmax(220px, 280px) minmax(260px, 0.72fr) minmax(230px, 300px);
+  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(240px, 280px);
   gap: 24px;
   align-items: stretch;
   width: 100%;
@@ -360,17 +360,26 @@ select:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-height: 100%;
+  height: 100%;
 }
 
 .intake-side .primary-button {
   margin-top: auto;
 }
 
+.intake-photo {
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 100%;
+  height: 100%;
+}
+
 .photo-input {
   position: relative;
   display: grid;
   place-items: center;
-  min-height: 220px;
+  min-height: 0;
+  height: 100%;
   overflow: hidden;
   border: 2px dashed oklch(0.73 0.04 345);
   border-radius: 22px;
@@ -414,7 +423,6 @@ select:focus-visible {
 .photo-input img {
   width: 100%;
   height: 100%;
-  min-height: 220px;
   object-fit: cover;
 }
 
@@ -426,7 +434,7 @@ select:focus-visible {
 
 .intake-message textarea {
   height: 100%;
-  min-height: 280px;
+  min-height: 240px;
   resize: none;
 }
 
@@ -506,7 +514,7 @@ select:focus-visible {
 
 .editor-intro {
   display: block;
-  max-width: 1180px;
+  max-width: 1320px;
   margin-bottom: 32px;
 }
 
@@ -528,11 +536,11 @@ select:focus-visible {
 .editor-workspace {
   display: grid;
   grid-template-columns: minmax(440px, 520px) minmax(480px, 1fr);
-  justify-content: center;
+  justify-content: stretch;
   gap: 48px;
   align-items: start;
   width: 100%;
-  max-width: 1180px;
+  max-width: 1320px;
   margin: 0 auto;
 }
 

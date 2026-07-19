@@ -514,21 +514,24 @@ export default function App() {
           </div>
 
           <form className="creator-intake" onSubmit={createCard}>
-            <label className={`photo-input ${photoPreview ? "has-photo" : ""}`}>
-              {photoPreview ? (
-                <img src={photoPreview} alt="Prévia da foto escolhida" />
-              ) : (
-                <span>
-                  <strong>Adicionar uma foto</strong>
-                  JPG, PNG ou WebP · até 8 MB
-                </span>
-              )}
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={(event) => choosePhoto(event.target.files?.[0])}
-              />
-            </label>
+            <div className="field intake-photo">
+              <span>Foto</span>
+              <label className={`photo-input ${photoPreview ? "has-photo" : ""}`}>
+                {photoPreview ? (
+                  <img src={photoPreview} alt="Prévia da foto escolhida" />
+                ) : (
+                  <span>
+                    <strong>Adicionar uma foto</strong>
+                    JPG, PNG ou WebP · até 8 MB
+                  </span>
+                )}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(event) => choosePhoto(event.target.files?.[0])}
+                />
+              </label>
+            </div>
 
             <label className="field intake-message">
               <span>O que você quer falar para essa pessoa?</span>
