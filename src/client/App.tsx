@@ -394,7 +394,7 @@ export default function App() {
   return (
     <>
       <header className="site-header">
-        <a className="wordmark" href="/" aria-label="Holocard, página inicial">
+        <a className="wordmark" href="/" aria-label="holocard, página inicial">
           holocard <span>✦</span>
         </a>
         <div className="header-actions">
@@ -462,10 +462,12 @@ export default function App() {
       <main>
         <section className="hero">
           <div className="hero-copy">
-            <h1>Toda ocasião 🩷 merece um Holocard ✦</h1>
+            <h1>
+              Toda ocasião 🩷 merece um holocard <span>✦</span>
+            </h1>
             <p className="hero-body">
               Surpreenda quem você gosta com um cartão feito só para ela. Conte a ocasião e o
-              Holocard monta a mensagem, o visual e o link para você enviar.
+              holocard monta a mensagem, o visual e o link para você enviar.
             </p>
             <div className="hero-actions">
               <button className="primary-button" type="button" onClick={scrollToCreator}>
@@ -479,7 +481,7 @@ export default function App() {
               Não precisa criar conta. Você pode pedir 2 ajustes e apagar o cartão quando quiser.
             </p>
           </div>
-          <section className="hero-card" aria-label="Exemplo interativo de Holocard">
+          <section className="hero-card" aria-label="Exemplo interativo de holocard">
             <HoloCard manifest={SAMPLE_MANIFEST} photoUrl={SAMPLE_PHOTO} />
             <p>Mexa o cursor para ver a luz mudar.</p>
           </section>
@@ -508,7 +510,7 @@ export default function App() {
             <p>Agora é a sua vez</p>
             <h2>Escolha uma foto e escreva como você falaria.</h2>
             <p>
-              Pode mandar o texto do jeito que vier, em qualquer idioma. O Holocard corrige a
+              Pode mandar o texto do jeito que vier, em qualquer idioma. O holocard corrige a
               escrita e organiza a mensagem sem inventar nomes ou fatos.
             </p>
           </div>
@@ -571,7 +573,7 @@ export default function App() {
                 <small>Você vai usar essa senha para editar ou apagar o cartão.</small>
               </label>
               <button className="primary-button wide" type="submit" disabled={busy !== null}>
-                {busy === "create" ? "Montando o cartão…" : "Fazer meu Holocard"}
+                {busy === "create" ? "Montando o cartão…" : "Fazer meu holocard"}
               </button>
               <p className="privacy-note">A foto fica pública para quem tiver o link.</p>
             </div>
@@ -883,7 +885,7 @@ export default function App() {
           <h2>O código do cartão é open source.</h2>
           <p>
             Os modelos, o gerador e as instruções para agentes ficam no repositório. Dá para criar
-            um HTML no seu computador sem enviar a foto para o Holocard.
+            um HTML no seu computador sem enviar a foto para o holocard.
           </p>
           <a href="https://github.com/decocms/holocard" target="_blank" rel="noreferrer">
             Abrir no GitHub
@@ -892,7 +894,9 @@ export default function App() {
       </main>
 
       <footer>
-        <span>holocard ✦</span>
+        <span className="brand-mark">
+          holocard <span>✦</span>
+        </span>
         <a href="https://poke-holo.simey.me/" target="_blank" rel="noreferrer">
           Efeito baseado no trabalho de poke-holo
         </a>

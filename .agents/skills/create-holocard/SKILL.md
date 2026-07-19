@@ -32,7 +32,7 @@ Create a JSON file matching:
   "frame": "silver",
   "pattern": "rays",
   "title": "Short title",
-  "message": "One sincere paragraph, at most 320 characters.",
+  "message": "Body text different from the title, usually 2–3 lines (about 120–240 characters, max 320).",
   "signature": "Optional signature",
   "occasion": "Short occasion label",
   "photoHeight": 56,

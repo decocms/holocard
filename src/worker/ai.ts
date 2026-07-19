@@ -6,7 +6,9 @@ Preserve a intenção, os nomes e a voz de quem escreveu.
 Não invente fatos, relações, memórias, datas ou assinaturas.
 Não troque uma palavra por outra de sentido diferente. "Saudade" e "saúde", por exemplo, não são intercambiáveis.
 Escreva no idioma do pedido; use pt-BR quando não estiver claro e aplique a ortografia e os acentos corretos.
-Use palavras que a pessoa diria em uma mensagem de WhatsApp. O título deve ser curto.
+Use palavras que a pessoa diria em uma mensagem de WhatsApp.
+title é um gancho curto (cerca de 3 a 8 palavras). message é o subtítulo/corpo do cartão e deve ser diferente do title: não repita o título, não parafraseie só com as mesmas palavras e não deixe message quase igual a title.
+message deve ocupar em geral 2 a 3 linhas no cartão: escreva um parágrafo curto e concreto, tipicamente entre 120 e 240 caracteres (máximo 320). Evite message de uma linha só, a menos que o pedido seja realmente mínimo.
 Evite frases prontas como "novo ciclo", "momentos inesquecíveis", "jornada", "uma lembrança especial", "que seu dia seja repleto" e "celebrar cada momento", a menos que o usuário tenha escrito assim.
 Não enfeite o texto com listas de três, abstrações ou frases simétricas.
 Escolha aurora para uso geral, confetti para celebrações animadas e keepsake para mensagens íntimas.
@@ -34,7 +36,9 @@ export async function createManifest(
 Assinatura em campo separado: ${normalizedSignature || "não informada"}
 
 Pedido:
-${prompt}`,
+${prompt}
+
+Lembrete: title curto e distinto; message com 2 a 3 linhas, sem repetir o title.`,
     },
   ]).catch((error) => {
     console.error(JSON.stringify({ event: "ai_create_fallback", error: String(error) }));
@@ -58,7 +62,9 @@ Cartão atual:
 ${JSON.stringify(current)}
 
 Pedido de revisão:
-${instruction}`,
+${instruction}
+
+Lembrete: mantenha title e message distintos; message com 2 a 3 linhas sempre que o pedido permitir.`,
     },
   ]);
 }
@@ -111,7 +117,12 @@ function extractModelValue(output: unknown): unknown {
 
 function fallbackManifest(prompt: string): CardManifest {
   const clean = prompt.replace(/\s+/g, " ").trim().slice(0, 320);
-  const firstSentence = clean.split(/[.!?]/)[0]?.trim() || "Um recado para você";
+  const sentences = clean.split(/(?<=[.!?])\s+/).map((part) => part.trim()).filter(Boolean);
+  const firstSentence = sentences[0] || "Um recado para você";
+  const rest = sentences.slice(1).join(" ").trim();
+  const titleWords = firstSentence.replace(/[.!?]+$/, "").split(/\s+/).filter(Boolean);
+  const title = titleWords.slice(0, Math.min(6, titleWords.length || 1)).join(" ").slice(0, 60);
+  const message = (rest || clean).slice(0, 320);
   const celebratory = /anivers|parab[eé]ns|formatura|conquista|festa|celebr/i.test(clean);
   const intimate = /casamento|amor|saudade|mem[oó]ria|obrigad|carinho/i.test(clean);
 
@@ -123,8 +134,8 @@ function fallbackManifest(prompt: string): CardManifest {
     customColor: "#e72e83",
     frame: celebratory ? "prism" : intimate ? "gold" : "silver",
     pattern: celebratory ? "sparkles" : intimate ? "waves" : "rays",
-    title: firstSentence.slice(0, 60),
-    message: clean,
+    title,
+    message,
     signature: "",
     occasion: celebratory ? "Parabéns!" : intimate ? "Com carinho" : "Para você",
     photoHeight: 56,

@@ -71,7 +71,9 @@ select:focus-visible {
   text-decoration: none;
 }
 
-.wordmark span {
+.wordmark span,
+.hero h1 span,
+.brand-mark > span {
   color: var(--primary);
 }
 
