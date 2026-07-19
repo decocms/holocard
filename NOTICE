@@ -1,0 +1,6 @@
+Holocard’s holographic interaction is inspired by the technique demonstrated
+by Simon Goellner at https://poke-holo.simey.me/.
+
+This repository contains an original, gradient-only implementation. It does
+not copy Pokémon artwork, branding, card frames, texture assets, or the
+GPL-licensed source files from pokemon-cards-css.

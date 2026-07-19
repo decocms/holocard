@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "locale": "pt-BR",
+  "template": "confetti",
+  "accent": "sun",
+  "customColor": "#e72e83",
+  "frame": "prism",
+  "pattern": "sparkles",
+  "title": "Feliz aniversário, Tally!",
+  "message": "Que o seu novo ano venha cheio de histórias boas, risadas altas e gente querida por perto.",
+  "signature": "Com carinho, Gui",
+  "occasion": "Feliz aniversário",
+  "photoHeight": 56,
+  "photoPositionX": 50,
+  "photoPositionY": 50
+}
