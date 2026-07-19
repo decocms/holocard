@@ -5,6 +5,7 @@ import {
   type CardManifest,
   CardManifestSchema,
   CARD_PATTERNS,
+  CARD_TEMPLATES,
   type PublicCard,
 } from "@/core/types";
 import { HoloCard } from "./HoloCard";
@@ -34,6 +35,11 @@ interface CreatedCard extends PublicCard {
 }
 
 const STORAGE_KEY = "holocard:last-card";
+const TEMPLATE_LABELS: Record<CardManifest["template"], string> = {
+  aurora: "Aurora",
+  confetti: "Confete",
+  keepsake: "Lembrança",
+};
 const THEME_LABELS: Record<CardManifest["accent"], string> = {
   rose: "Rosa",
   aqua: "Azul",
@@ -596,7 +602,24 @@ export default function App() {
 
               <aside className="editor-controls" aria-label="Controles do cartão">
                 <div className="editor-savebar">
-                  <span>{isDirty ? "Você tem mudanças para salvar." : "Tudo salvo."}</span>
+                  <label className="template-select">
+                    <span>Modelo</span>
+                    <select
+                      value={card.manifest.template}
+                      aria-label="Modelo do cartão"
+                      onChange={(event) =>
+                        updateManifest({
+                          template: event.target.value as CardManifest["template"],
+                        })
+                      }
+                    >
+                      {CARD_TEMPLATES.map((template) => (
+                        <option key={template} value={template}>
+                          {TEMPLATE_LABELS[template]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                   <button
                     className="primary-button"
                     type="button"

@@ -32,7 +32,8 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -44,7 +45,8 @@ a {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
-textarea:focus-visible {
+textarea:focus-visible,
+select:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
@@ -557,13 +559,39 @@ textarea:focus-visible {
 .editor-savebar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
+  align-items: end;
   gap: 16px;
 }
 
-.editor-savebar > span {
-  color: var(--muted);
+.template-select {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.template-select > span {
+  color: var(--ink);
   font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.template-select select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 40px 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%) calc(100% - 18px) calc(50% - 3px) / 6px 6px no-repeat,
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%) calc(100% - 12px) calc(50% - 3px) / 6px 6px no-repeat,
+    var(--bg);
+  color: var(--ink);
+  appearance: none;
+  cursor: pointer;
+}
+
+.template-select select:hover {
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--line));
 }
 
 .control-group {
