@@ -32,6 +32,7 @@
     "binding": "AI",
     "remote": true
   },
+  "rules": [{ "type": "Text", "globs": ["dist-mcp/*.html"], "fallthrough": true }],
   "triggers": { "crons": ["23 4 * * *"] },
   "observability": {
     "enabled": true,

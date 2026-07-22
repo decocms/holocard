@@ -46,6 +46,7 @@ function schema(properties: Record<string, unknown>, required: string[] = []) {
 export const IMPROVE_TOOLS: ToolDefinition[] = [
   {
     name: "get_briefing",
+    _meta: { ui: { resourceUri: "ui://holocard/briefing" } },
     description:
       "Start here every session. Returns the mission goals with live progress, a 7-day " +
       "metrics summary, open hypotheses, and recent memories — everything needed to decide " +
@@ -101,6 +102,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
   },
   {
     name: "metrics_query",
+    _meta: { ui: { resourceUri: "ui://holocard/briefing" } },
     description:
       "Aggregate the event stream. Filter by event name, group by day|name|path|country, over " +
       "a trailing window. Returns events count, summed value, and unique visitors per group.",
@@ -129,6 +131,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
   },
   {
     name: "goal_set",
+    _meta: { ui: { resourceUri: "ui://holocard/briefing" } },
     description:
       "Create or update a goal. A goal targets an event name (`metric`): progress is SUM(value) " +
       "of that event over the trailing window_days. Pass id to update.",
@@ -174,6 +177,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
   },
   {
     name: "goal_list",
+    _meta: { ui: { resourceUri: "ui://holocard/briefing" } },
     description: "List goals with live progress (current metric value vs target).",
     inputSchema: schema({}),
     async execute(env) {
@@ -185,6 +189,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
   },
   {
     name: "memory_write",
+    _meta: { ui: { resourceUri: "ui://holocard/briefing" } },
     description:
       "Record to the app's lab notebook so future sessions don't rediscover it. Kinds: " +
       "observation (something the metrics show), decision (what changed and why), result " +
@@ -221,6 +226,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
   },
   {
     name: "memory_search",
+    _meta: { ui: { resourceUri: "ui://holocard/briefing" } },
     description: "Search the notebook (substring match), newest first.",
     inputSchema: schema({
       query: { type: "string", description: "Substring to search for (optional — omit for latest)" },
@@ -250,6 +256,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
   },
   {
     name: "hypothesis_create",
+    _meta: { ui: { resourceUri: "ui://holocard/briefing" } },
     description:
       "File a falsifiable bet: 'If we <change>, then <metric> will <move> because <reason>'. " +
       "Every code change should trace back to one of these.",
@@ -295,6 +302,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
   },
   {
     name: "hypothesis_update",
+    _meta: { ui: { resourceUri: "ui://holocard/briefing" } },
     description:
       "Move a hypothesis through its lifecycle (proposed → testing → confirmed|refuted|abandoned) " +
       "and/or append evidence. RULE: no agent grades its own work — setting status to " +
@@ -355,6 +363,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
   },
   {
     name: "hypothesis_list",
+    _meta: { ui: { resourceUri: "ui://holocard/briefing" } },
     description: "List hypotheses, optionally filtered by status.",
     inputSchema: schema({
       status: { type: "string", enum: ["proposed", "testing", "confirmed", "refuted", "abandoned"] },
@@ -384,6 +393,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
   },
   {
     name: "task_create",
+    _meta: { ui: { resourceUri: "ui://holocard/team" } },
     description:
       "Create a task on the shared board. Tasks are WHO-is-doing-WHAT (the notebook records " +
       "what was learned). Tie implementation tasks to their hypothesis.",
@@ -432,6 +442,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
   },
   {
     name: "task_update",
+    _meta: { ui: { resourceUri: "ui://holocard/team" } },
     description:
       "Claim a task (set owner + in_progress), move it through pending → in_progress → review " +
       "→ done, or cancel it. Send finished work to 'review' — the reviewer moves it to 'done'.",
@@ -472,6 +483,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
   },
   {
     name: "task_list",
+    _meta: { ui: { resourceUri: "ui://holocard/team" } },
     description: "List tasks, optionally filtered by status and/or owner. Open tasks first.",
     inputSchema: schema({
       status: { type: "string", enum: ["pending", "in_progress", "review", "done", "cancelled"] },
@@ -502,6 +514,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
   },
   {
     name: "room_post",
+    _meta: { ui: { resourceUri: "ui://holocard/team" } },
     description:
       "Post a message to a room — the shared space where agents converse and humans watch " +
       "(readable from deco studio or any MCP client via room_read). Rooms are created by first " +
@@ -533,6 +546,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
   },
   {
     name: "room_read",
+    _meta: { ui: { resourceUri: "ui://holocard/team" } },
     description:
       "Read room messages, newest first. Omit `room` to read across all rooms (each message " +
       "carries its room). Also the human's window into agent conversations.",

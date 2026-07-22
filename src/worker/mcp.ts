@@ -13,6 +13,7 @@ import {
   updateCardSlug,
 } from "./cards";
 import { IMPROVE_TOOLS } from "./improve";
+import { MCP_APP_MIME, readResource, RESOURCES } from "./mcp-resources";
 import { track } from "./track";
 
 interface JsonRpcRequest {
@@ -26,6 +27,7 @@ export interface ToolDefinition {
   name: string;
   description: string;
   inputSchema: Record<string, unknown>;
+  _meta?: { ui?: { resourceUri: string } };
   execute: (env: Env, request: Request, input: Record<string, unknown>) => Promise<unknown>;
 }
 
@@ -252,7 +254,7 @@ async function dispatch(
     case "initialize":
       return {
         protocolVersion: "2024-11-05",
-        capabilities: { tools: { listChanged: false } },
+        capabilities: { tools: { listChanged: false }, resources: {} },
         serverInfo: { name: "holocard", version: "0.1.0" },
         instructions:
           "Crie cartões com create_card, mostre a URL final e lembre que há no máximo duas revisões. Confirme antes de delete_card.",
@@ -261,10 +263,11 @@ async function dispatch(
       return {};
     case "tools/list":
       return {
-        tools: tools.map(({ name, description, inputSchema }) => ({
+        tools: tools.map(({ name, description, inputSchema, _meta }) => ({
           name,
           description,
           inputSchema,
+          ...(_meta ? { _meta } : {}),
         })),
       };
     case "tools/call": {
@@ -284,7 +287,15 @@ async function dispatch(
       };
     }
     case "resources/list":
-      return { resources: [] };
+      return {
+        resources: RESOURCES.map((r) => ({ ...r, mimeType: MCP_APP_MIME })),
+      };
+    case "resources/read": {
+      const uri = requiredString(params.uri, "resource uri", 200);
+      const contents = readResource(uri);
+      if (!contents) throw new Error(`Unknown resource: ${uri}`);
+      return { contents: [contents] };
+    }
     case "prompts/list":
       return { prompts: [] };
     default:

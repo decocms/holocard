@@ -20,5 +20,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "scripts", "tests", "vite.config.ts", "worker-configuration.d.ts"]
+  "include": ["src", "mcp-app", "scripts", "tests", "vite.config.ts", "vite.mcp.config.ts", "worker-configuration.d.ts"]
 }
