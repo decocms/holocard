@@ -3,7 +3,8 @@
 import { type ComponentType, useState } from "react";
 import { useMcpHostContext, useMcpState } from "./context";
 import { BriefingView } from "./views/briefing";
-import { TeamView } from "./views/team";
+import { BoardView } from "./views/board";
+import { RoomsView } from "./views/rooms";
 
 const TOOL_PAGES: Record<string, ComponentType> = {
   get_briefing: BriefingView,
@@ -15,16 +16,17 @@ const TOOL_PAGES: Record<string, ComponentType> = {
   hypothesis_update: BriefingView,
   memory_search: BriefingView,
   memory_write: BriefingView,
-  task_list: TeamView,
-  task_create: TeamView,
-  task_update: TeamView,
-  room_read: TeamView,
-  room_post: TeamView,
+  task_list: BoardView,
+  task_create: BoardView,
+  task_update: BoardView,
+  room_read: RoomsView,
+  room_post: RoomsView,
 };
 
 const TABS: Array<{ label: string; component: ComponentType }> = [
   { label: "Briefing", component: BriefingView },
-  { label: "Team", component: TeamView },
+  { label: "Rooms", component: RoomsView },
+  { label: "Board", component: BoardView },
 ];
 
 export function AppRouter() {

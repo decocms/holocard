@@ -119,6 +119,11 @@ Dom's hires and goal proposals). Watches `#general` and `#reviews` (via
 - **Rooms:** `#general` = handoffs, escalations, session summaries.
   `#reviews` = verdicts with reasons. Silence is a feature — post when
   something changed or needs a decision, never "still working".
+- **`#control` is Gui's override channel.** Every briefing carries the
+  latest control directive (`control`, `paused`). If `paused` is true: claim
+  and start nothing, reply in rooms only, wait for a RESUME. Any other Gui
+  directive in `#control` ("drop X, focus Y") overrides the pull order —
+  acknowledge in `#general` and comply.
 - **Briefing first, always.** Every session starts with `get_briefing`,
   whatever the hat.
 
