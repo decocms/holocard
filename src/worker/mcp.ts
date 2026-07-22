@@ -12,6 +12,8 @@ import {
   updateCardPassword,
   updateCardSlug,
 } from "./cards";
+import { IMPROVE_TOOLS } from "./improve";
+import { track } from "./track";
 
 interface JsonRpcRequest {
   jsonrpc: "2.0";
@@ -20,7 +22,7 @@ interface JsonRpcRequest {
   params?: Record<string, unknown>;
 }
 
-interface ToolDefinition {
+export interface ToolDefinition {
   name: string;
   description: string;
   inputSchema: Record<string, unknown>;
@@ -209,6 +211,8 @@ const tools: ToolDefinition[] = [
   },
 ];
 
+tools.push(...IMPROVE_TOOLS);
+
 const toolByName = Object.fromEntries(tools.map((tool) => [tool.name, tool]));
 
 export async function handleMcp(request: Request, env: Env): Promise<Response> {
@@ -271,6 +275,7 @@ async function dispatch(
         params.arguments && typeof params.arguments === "object"
           ? (params.arguments as Record<string, unknown>)
           : {};
+      await track(env, "mcp_tool_call", { dims: { tool: name } });
       const output = await tool.execute(env, request, input);
       return {
         content: [{ type: "text", text: JSON.stringify(output, null, 2) }],

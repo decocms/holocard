@@ -238,7 +238,7 @@ export function HoloCard({
       return;
     }
     const Orientation = window.DeviceOrientationEvent as OrientationConstructor | undefined;
-    const Motion = window.DeviceMotionEvent as OrientationConstructor | undefined;
+    const Motion = window.DeviceMotionEvent as unknown as OrientationConstructor | undefined;
     if (!Orientation) return;
     state.permissionBusy = true;
     try {
