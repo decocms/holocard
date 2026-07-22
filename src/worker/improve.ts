@@ -194,7 +194,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
         kind: { type: "string", enum: ["observation", "decision", "result", "lesson"] },
         content: { type: "string" },
         goal_id: { type: "string", description: "Related goal (optional)" },
-        author: { type: "string", description: "Your agent handle (e.g. 'cole')" },
+        author: { type: "string", description: "Your agent handle (e.g. 'Iris')" },
       },
       ["kind", "content"],
     ),
@@ -330,7 +330,7 @@ export const IMPROVE_TOOLS: ToolDefinition[] = [
         }
         if (input.status === "confirmed") {
           const reviewer = input.reviewed_by ? String(input.reviewed_by) : existing.reviewed_by;
-          if (!reviewer || (existing.author && reviewer === existing.author)) {
+          if (!reviewer || (existing.author && reviewer.toLowerCase() === existing.author.toLowerCase())) {
             throw new Error(
               "confirming requires reviewed_by set to a handle DIFFERENT from the author — " +
                 "run an adversarial review (assume the conclusion is wrong: confounders, " +

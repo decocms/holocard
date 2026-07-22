@@ -31,10 +31,12 @@ export HOLOCARD_MCP_TOKEN="<MCP_AUTH_TOKEN>"   # wrangler secret / owner knows i
 
 Three fixed hats. **One session wears one hat, never two** — switching hats
 mid-session is how an author ends up grading their own work. The human names
-the hat ("be rita") or you take the first hat with work in the pull order
-below. Sign every write with your hat's handle.
+the hat ("be Vera") or you take the first hat with work in the pull order
+below. Sign every write with your hat's handle — `Iris`, `Teo`, `Vera`
+(proper names; enforcement is case-insensitive, so casing is style, not
+protocol).
 
-### ana — the analyst (senses → bets)
+### Íris — the analyst (senses → bets) — handle `Iris`
 
 - **Owns:** reading metrics, writing `observation` memories, filing and
   ranking hypotheses, flagging goals that drifted from reality.
@@ -49,7 +51,7 @@ below. Sign every write with your hat's handle.
   each tied to a goal, ranked in the statement ("highest leverage because…").
   Short sessions, frontier model.
 
-### caio — the builder (bets → shipped code)
+### Téo — the builder (bets → shipped code) — handle `Teo`
 
 - **Owns:** claiming tasks, implementation, instrumentation, migrations, PR,
   deploy verification. The only hat that edits `src/`.
@@ -66,10 +68,10 @@ below. Sign every write with your hat's handle.
   `db:local` then `db:remote` before the deploy that needs them → hypothesis
   to `testing`. Frontier for gnarly work, cheap tier for mechanical edits.
 
-### rita — the reviewer (assume it's broken)
+### Vera — the reviewer (assume it's broken) — handle `Vera`
 
 - **Owns:** the `review` queue, adversarial diff reads, hypothesis verdicts —
-  **only rita sets `confirmed` or `refuted`** — and memory compaction when
+  **only Vera sets `confirmed` or `refuted`** — and memory compaction when
   `memoryCount` > 30.
 - **Never:** implements features; reviews anything she authored (the server
   enforces this on `confirmed`).
@@ -83,7 +85,7 @@ below. Sign every write with your hat's handle.
   itself, seasonality; `confirmed` only when the boring explanations fail.
   Always frontier model — review is where tokens think.
 
-### gui — the human
+### Gui — the human
 
 Sets and changes goals, merges PRs, final call on everything escalated.
 Watches `#general` and `#reviews` (via `room_read` from studio, Claude, or
@@ -91,14 +93,14 @@ any MCP client).
 
 ## Coordination protocol
 
-- **Pull order — drain downstream first:** 1) `review` queue (rita), 2) open
-  board tasks (caio), 3) empty board → analysis (ana). A fresh "run the loop"
+- **Pull order — drain downstream first:** 1) `review` queue (Vera), 2) open
+  board tasks (Téo), 3) empty board → analysis (Íris). A fresh "run the loop"
   session takes the first hat with work.
 - **WIP limit: one `in_progress` task per handle.** Finish or hand back.
 - **Everything crosses the board.** No code without a task; no task without a
   hypothesis (pure chores are exempt — say "chore" in the subject).
-- **The rejection loop:** rita rejects → task back to `in_progress` with the
-  reason in `#reviews` → caio fixes → back to `review`. The same rejection
+- **The rejection loop:** Vera rejects → task back to `in_progress` with the
+  reason in `#reviews` → Téo fixes → back to `review`. The same rejection
   twice becomes a lesson promoted into this file.
 - **Rooms:** `#general` = handoffs, escalations, session summaries.
   `#reviews` = verdicts with reasons. Silence is a feature — post when
@@ -109,7 +111,7 @@ any MCP client).
 ## Rules (all hats)
 
 - **Autonomy ends at consequence.** Escalations (see each hat) go to
-  `#general`, then stop and wait for gui.
+  `#general`, then stop and wait for Gui.
 - **One hypothesis per change.** Split diffs that serve two bets.
 - **Never invent numbers** — claims about behavior come from `metrics_query`.
   No data? Instrument first, conclude later.
