@@ -13,7 +13,7 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "run_worker_first": ["/api/*", "/mcp", "/mcp/*", "/media/*"]
+    "run_worker_first": ["/api/*", "/mcp", "/mcp/*", "/media/*", "/e"]
   },
   "d1_databases": [
     {
@@ -32,6 +32,7 @@
     "binding": "AI",
     "remote": true
   },
+  "triggers": { "crons": ["23 4 * * *"] },
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1

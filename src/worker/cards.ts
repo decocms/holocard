@@ -1,3 +1,4 @@
+import { track } from "./track";
 import { renderCardDocument, slugify } from "@/core/card";
 import { CardManifestSchema, type PublicCard, type StoredCard } from "@/core/types";
 import { createManifest, reviseManifest } from "./ai";
@@ -119,6 +120,7 @@ export async function createCard(
     const row = await getCardRowById(env, id);
     if (!row) throw new Error("Card insert did not persist");
     await writeCardHtml(env, row, input.origin);
+    await track(env, "card_created");
     return { ...toPublicCard(row, input.origin), editToken };
   } catch (error) {
     await env.CARDS.delete(photoKey);

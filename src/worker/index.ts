@@ -18,6 +18,7 @@ import {
   updateCardSlug,
 } from "./cards";
 import { handleMcp } from "./mcp";
+import { requestCountry, track, visitorHash } from "./track";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -209,10 +210,51 @@ app.get("/media/:id/:kind", async (context) => {
   return new Response(object.body, { headers });
 });
 
+
+// First-party analytics beacon for client-side events (see CLAUDE.md).
+// Public by design; inputs validated and size-capped, writes fire-and-forget.
+app.post("/e", async (context) => {
+  let body: Record<string, unknown>;
+  try {
+    body = (await context.req.json()) as Record<string, unknown>;
+  } catch {
+    return noStoreJson({ ok: false }, 400);
+  }
+  const name = String(body.name ?? "").trim();
+  if (!name || name.length > 64 || !/^[a-z0-9_.:-]+$/i.test(name)) {
+    return noStoreJson({ ok: false, error: "invalid event name" }, 400);
+  }
+  const request = context.req.raw;
+  context.executionCtx.waitUntil(
+    (async () => {
+      await track(context.env, name, {
+        value: typeof body.value === "number" && Number.isFinite(body.value) ? body.value : 1,
+        path: typeof body.path === "string" ? body.path.slice(0, 256) : undefined,
+        dims:
+          body.dims && typeof body.dims === "object"
+            ? (body.dims as Record<string, string | number | boolean>)
+            : undefined,
+        visitor: await visitorHash(context.env, request),
+        country: requestCountry(request),
+      });
+    })(),
+  );
+  return noStoreJson({ ok: true });
+});
+
 app.get("/:slug", async (context) => {
   const slug = context.req.param("slug");
   if (!/^[a-z0-9][a-z0-9-]{0,79}$/.test(slug)) return context.notFound();
   const request = context.req.raw;
+  context.executionCtx.waitUntil(
+    (async () => {
+      await track(context.env, "pageview", {
+        path: `/${slug}`,
+        visitor: await visitorHash(context.env, request),
+        country: requestCountry(request),
+      });
+    })(),
+  );
   const cache = await caches.open("holocard");
   const cached = await cache.match(request);
   if (cached) return cached;
@@ -235,6 +277,20 @@ app.get("/:slug", async (context) => {
   return response;
 });
 
+app.get("/", (context) => {
+  const request = context.req.raw;
+  context.executionCtx.waitUntil(
+    (async () => {
+      await track(context.env, "pageview", {
+        path: "/",
+        visitor: await visitorHash(context.env, request),
+        country: requestCountry(request),
+      });
+    })(),
+  );
+  return context.env.ASSETS.fetch(request);
+});
+
 app.all("*", (context) => context.env.ASSETS.fetch(context.req.raw));
 
 app.onError((error, context) => {
@@ -249,7 +305,13 @@ app.onError((error, context) => {
   return noStoreJson({ error: "Não foi possível concluir agora. Tente novamente." }, 500);
 });
 
-export default app;
+export default {
+  fetch: app.fetch,
+  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
+    const cutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
+    await env.DB.prepare("DELETE FROM events WHERE ts < ?").bind(cutoff).run();
+  },
+};
 
 function noStoreJson(
   body: unknown,

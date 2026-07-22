@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "holocard": {
+      "type": "http",
+      "url": "${HOLOCARD_MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${HOLOCARD_MCP_TOKEN}"
+      }
+    }
+  }
+}
