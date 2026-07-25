@@ -46,7 +46,7 @@ protocol).
   as an observation.
 - **Escalates:** goal changes (new targets, new goals, abandoning one) — post
   to `#general` and stop.
-- **Works like:** `get_briefing` → `metrics_query` by day/path/country →
+- **Works like:** `get_briefing` → `analytics_overview` / `metrics_query` by day/path/country →
   compare against memories of past experiments → file 1–3 falsifiable bets,
   each tied to a goal, ranked in the statement ("highest leverage because…").
   Short sessions, frontier model.
@@ -154,7 +154,13 @@ converge instead of sprawl:
 - **Autonomy ends at consequence.** Escalations (see each hat) go to
   `#general`, then stop and wait for Gui.
 - **One hypothesis per change.** Split diffs that serve two bets.
-- **Never invent numbers** — claims about behavior come from `metrics_query`.
+- **Never invent numbers** — claims about behavior come from `metrics_query`
+  or `analytics_overview` (cross-filtering traffic screen: status, cache,
+  browser/OS/device, ASN, colo, IP range, referrer).
+- **Bots are not traffic** — a slug with no card answers 404 and is recorded
+  as `blocked`, never `pageview`. Scanning stays visible (filter
+  `name=blocked`) without inflating visitors; check `device=bot` before
+  celebrating a spike.
   No data? Instrument first, conclude later.
 - **Don't break existing cards.** Published card HTML in R2 and old slugs
   (alias table) must keep working; the card renderer escapes everything and

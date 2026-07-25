@@ -17,6 +17,12 @@ export const RESOURCES = [
     description: "Goals with live progress, 7-day metrics, open hypotheses, recent memories.",
   },
   {
+    uri: "ui://holocard/analytics",
+    name: "Traffic",
+    description:
+      "Cross-filtering traffic dashboard: daily series by event, plus pages, countries, referrers, status, cache, browsers, devices, networks.",
+  },
+  {
     uri: "ui://holocard/team",
     name: "Team",
     description: "The task board and the rooms where the agent team converses.",

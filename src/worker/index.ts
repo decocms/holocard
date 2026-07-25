@@ -18,7 +18,7 @@ import {
   updateCardSlug,
 } from "./cards";
 import { handleMcp } from "./mcp";
-import { requestCountry, track, visitorHash } from "./track";
+import { requestCountry, requestDims, track, visitorHash } from "./track";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -230,10 +230,13 @@ app.post("/e", async (context) => {
       await track(context.env, name, {
         value: typeof body.value === "number" && Number.isFinite(body.value) ? body.value : 1,
         path: typeof body.path === "string" ? body.path.slice(0, 256) : undefined,
-        dims:
-          body.dims && typeof body.dims === "object"
+        // server-side dims win over anything the client claims
+        dims: {
+          ...(body.dims && typeof body.dims === "object"
             ? (body.dims as Record<string, string | number | boolean>)
-            : undefined,
+            : {}),
+          ...requestDims(request),
+        },
         visitor: await visitorHash(context.env, request),
         country: requestCountry(request),
       });
@@ -242,25 +245,51 @@ app.post("/e", async (context) => {
   return noStoreJson({ ok: true });
 });
 
+/** One pageview row with the full request/response dimensions attached. */
+async function trackPageview(
+  env: Env,
+  request: Request,
+  path: string,
+  response?: Response,
+): Promise<void> {
+  await track(env, "pageview", {
+    path,
+    visitor: await visitorHash(env, request),
+    country: requestCountry(request),
+    dims: requestDims(request, response),
+  });
+}
+
 app.get("/:slug", async (context) => {
   const slug = context.req.param("slug");
   if (!/^[a-z0-9][a-z0-9-]{0,79}$/.test(slug)) return context.notFound();
   const request = context.req.raw;
-  context.executionCtx.waitUntil(
-    (async () => {
-      await track(context.env, "pageview", {
+  const cache = await caches.open("holocard");
+  const cached = await cache.match(request);
+  if (cached) {
+    context.executionCtx.waitUntil(trackPageview(context.env, request, `/${slug}`, cached));
+    return cached;
+  }
+
+  const result = await getCardHtmlBySlug(context.env, slug);
+  // A card that does not exist is a 404, not a pageview: slug-shaped probes
+  // (/admin, /config, /.env-ish guesses) were being counted as traffic and
+  // answered with whatever the asset server had. They land in "blocked"
+  // instead, so scanning stays visible without inflating visitors.
+  if (!result) {
+    context.executionCtx.waitUntil(
+      track(context.env, "blocked", {
         path: `/${slug}`,
         visitor: await visitorHash(context.env, request),
         country: requestCountry(request),
-      });
-    })(),
-  );
-  const cache = await caches.open("holocard");
-  const cached = await cache.match(request);
-  if (cached) return cached;
-
-  const result = await getCardHtmlBySlug(context.env, slug);
-  if (!result) return context.env.ASSETS.fetch(request);
+        dims: requestDims(request),
+      }),
+    );
+    return context.text("Not found\n", 404, {
+      "cache-control": "public, max-age=300",
+      "x-robots-tag": "noindex",
+    });
+  }
   if (result.row.slug !== slug) {
     return Response.redirect(`${resolveOrigin(request, context.env)}/${result.row.slug}`, 301);
   }
@@ -274,21 +303,15 @@ app.get("/:slug", async (context) => {
   headers.set("x-frame-options", "SAMEORIGIN");
   const response = new Response(result.object.body, { headers });
   context.executionCtx.waitUntil(cache.put(request, response.clone()));
+  context.executionCtx.waitUntil(trackPageview(context.env, request, `/${slug}`, response));
   return response;
 });
 
-app.get("/", (context) => {
+app.get("/", async (context) => {
   const request = context.req.raw;
-  context.executionCtx.waitUntil(
-    (async () => {
-      await track(context.env, "pageview", {
-        path: "/",
-        visitor: await visitorHash(context.env, request),
-        country: requestCountry(request),
-      });
-    })(),
-  );
-  return context.env.ASSETS.fetch(request);
+  const response = await context.env.ASSETS.fetch(request);
+  context.executionCtx.waitUntil(trackPageview(context.env, request, "/", response));
+  return response;
 });
 
 app.all("*", (context) => context.env.ASSETS.fetch(context.req.raw));

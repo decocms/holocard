@@ -2,6 +2,7 @@
 // iframe; TOOL_PAGES maps it to a view. Tabs let humans switch manually.
 import { type ComponentType, useState } from "react";
 import { useMcpHostContext, useMcpState } from "./context";
+import { AnalyticsView } from "./views/analytics";
 import { BriefingView } from "./views/briefing";
 import { BoardView } from "./views/board";
 import { RoomsView } from "./views/rooms";
@@ -11,6 +12,7 @@ const TOOL_PAGES: Record<string, ComponentType> = {
   goal_list: BriefingView,
   goal_set: BriefingView,
   metrics_query: BriefingView,
+  analytics_overview: AnalyticsView,
   hypothesis_list: BriefingView,
   hypothesis_create: BriefingView,
   hypothesis_update: BriefingView,
@@ -25,6 +27,7 @@ const TOOL_PAGES: Record<string, ComponentType> = {
 
 const TABS: Array<{ label: string; component: ComponentType }> = [
   { label: "Briefing", component: BriefingView },
+  { label: "Traffic", component: AnalyticsView },
   { label: "Rooms", component: RoomsView },
   { label: "Board", component: BoardView },
 ];

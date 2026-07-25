@@ -4,6 +4,7 @@
 // numbers, and decide what to build next. The app provides senses (events),
 // a compass (goals), and a notebook (memories/hypotheses); the agent — and
 // the tokens thrown at it — provide the intelligence.
+import { analyticsOverview, DIMENSIONS, type Dimension } from "./analytics";
 import type { ToolDefinition } from "./mcp";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -60,7 +61,50 @@ function schema(properties: Record<string, unknown>, required: string[] = []) {
   return { type: "object", properties, required, additionalProperties: false };
 }
 
+// Every dimension of the event stream is both a ranking and a filter, so the
+// analytics view cross-filters: click a country, the pages and referrers
+// follow, the country list stays whole.
+const DIM_DESC: Record<Dimension, string> = {
+  name: "event name (pageview, card_created, blocked…)",
+  path: "request path",
+  country: "country, 2-letter ISO code",
+  ref: "referrer hostname, or '(direct)'",
+  status: "HTTP status of the response",
+  cache: "cf-cache-status when available",
+  browser: "browser derived from the user agent (Chrome, Safari, Bot…)",
+  os: "operating system (macOS, iOS, Windows…)",
+  device: "device class (desktop | mobile | tablet | bot)",
+  asn: "visitor network: ASN + organization (e.g. 'AS15169 GOOGLE')",
+  ip: "visitor IP range (/24 on v4, /48 on v6)",
+  colo: "Cloudflare colo that served it (e.g. GRU)",
+};
+const DIM_SCHEMA = Object.fromEntries(
+  DIMENSIONS.map((dim) => [dim, { type: "string", description: `Filter by ${DIM_DESC[dim]}` }]),
+);
+
 export const IMPROVE_TOOLS: ToolDefinition[] = [
+  {
+    name: "analytics_overview",
+    _meta: { ui: { resourceUri: "ui://holocard/analytics" } },
+    description:
+      "Traffic dashboard over the event stream: totals, a daily series stacked by event name, " +
+      "and rankings for path, country, referrer, HTTP status, cache, browser, OS, device, ASN, " +
+      "IP range and colo. Every dimension doubles as a filter and each ranking ignores its own " +
+      "filter, so dimensions cross-filter each other.",
+    inputSchema: schema({
+      days: { type: "number", description: "Trailing window in days (1-90, default 7)" },
+      ...DIM_SCHEMA,
+    }),
+    async execute(env, _request, input) {
+      const query: Record<string, unknown> = { days: Number(input.days) || undefined };
+      for (const dim of DIMENSIONS) {
+        if (typeof input[dim] === "string" && input[dim]) query[dim] = input[dim];
+      }
+      return analyticsOverview(env, query, {
+        ownHosts: [new URL(env.PUBLIC_ORIGIN).hostname, "localhost"],
+      });
+    },
+  },
   {
     name: "get_briefing",
     _meta: { ui: { resourceUri: "ui://holocard/briefing" } },
