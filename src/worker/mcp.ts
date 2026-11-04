@@ -218,15 +218,9 @@ tools.push(...IMPROVE_TOOLS);
 const toolByName = Object.fromEntries(tools.map((tool) => [tool.name, tool]));
 
 export async function handleMcp(request: Request, env: Env): Promise<Response> {
-  if (request.method === "GET") {
-    return Response.json({
-      name: "holocard",
-      version: "0.1.0",
-      transport: "JSON-RPC 2.0 over HTTP",
-      endpoint: "/mcp",
-    });
-  }
-  if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
+  // No SSE stream here. Streamable HTTP clients treat a 200 on GET as a stream that
+  // closed and reconnect at once: Claude Code made ~900k GETs/day before this was 405.
+  if (request.method !== "POST") return new Response("Method not allowed", { status: 405, headers: { allow: "POST" } });
 
   const body = (await request.json().catch(() => null)) as JsonRpcRequest | null;
   if (!body || body.jsonrpc !== "2.0" || !body.method) {
